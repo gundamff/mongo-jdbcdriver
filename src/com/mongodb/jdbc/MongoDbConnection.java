@@ -176,8 +176,7 @@ public class MongoDbConnection implements Connection {
 	@Override
 	public Statement createStatement(int resultSetType, int resultSetConcurrency)
 			throws SQLException {
-		// TODO 自动生成的方法存根
-		return null;
+		return  new MongoDbStatement(this);
 	}
 
 	@Override

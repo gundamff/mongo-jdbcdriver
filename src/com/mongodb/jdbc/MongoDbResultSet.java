@@ -19,8 +19,10 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Map;
+import java.util.Vector;
 
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -31,9 +33,15 @@ public class MongoDbResultSet implements ResultSet {
 	
 	private DBObject currentObject;
 	
+	private String[] select;
+	
 	public MongoDbResultSet(DBCursor dbcursor) {
 		super();
 		this.dbcursor = dbcursor;
+		dbcursor.getKeysWanted().keySet();
+		select = (String[]) dbcursor.getKeysWanted().keySet().toArray(new String[0]);
+		
+		System.out.println(dbcursor);
 	}
 
 	public MongoDbResultSet() {
@@ -56,6 +64,7 @@ public class MongoDbResultSet implements ResultSet {
 	public boolean next() throws SQLException {
 		if(dbcursor.hasNext()){
 			currentObject = dbcursor.next();
+			System.out.println("currentObject="+currentObject);
 			return true;
 		}else{
 			currentObject = null;
@@ -172,8 +181,7 @@ public class MongoDbResultSet implements ResultSet {
 
 	@Override
 	public String getString(String columnLabel) throws SQLException {
-		// TODO 自动生成的方法存根
-		return null;
+		return currentObject.get(columnLabel).toString();
 	}
 
 	@Override
@@ -287,20 +295,21 @@ public class MongoDbResultSet implements ResultSet {
 
 	@Override
 	public ResultSetMetaData getMetaData() throws SQLException {
-		// TODO 自动生成的方法存根
-		return null;
+		if(currentObject==null){
+			return new MongoDbResultSetMetaData(select);
+		}else{
+			return new MongoDbResultSetMetaData(currentObject.keySet());
+		}
 	}
 
 	@Override
 	public Object getObject(int columnIndex) throws SQLException {
-		// TODO 自动生成的方法存根
-		return null;
+		return currentObject.get((String) currentObject.keySet().toArray()[columnIndex]).toString();
 	}
 
 	@Override
 	public Object getObject(String columnLabel) throws SQLException {
-		// TODO 自动生成的方法存根
-		return null;
+		return currentObject.get(columnLabel);
 	}
 
 	@Override
@@ -383,8 +392,7 @@ public class MongoDbResultSet implements ResultSet {
 
 	@Override
 	public int getRow() throws SQLException {
-		// TODO 自动生成的方法存根
-		return 0;
+		return dbcursor.count();
 	}
 
 	@Override
